@@ -8,8 +8,9 @@ public class BackStab extends JavaPlugin {
 	
 	public void onEnable() {
 		instance = this;
+		this.saveDefaultConfig();
 		this.getConfig();
-		
+		this.getServer().getPluginManager().registerEvents(new BackStabListener(this), this);
 	}
 	
 	public void onDisable() {
