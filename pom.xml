@@ -3,6 +3,7 @@
   <groupId>net.minekingdom.backstab</groupId>
   <artifactId>BackStab</artifactId>
   <version>1.7.2</version>
+  <name>BackStab</name>
   
   <organization>
     <name>MineKingdom</name>

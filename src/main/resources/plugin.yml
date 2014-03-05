@@ -1,0 +1,6 @@
+main: net.minekingdom.backstab.BackStab
+
+name: ${project.name}
+author: ${project.organization.name}
+version: ${project.version}
+
