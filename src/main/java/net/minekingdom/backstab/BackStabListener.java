@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -21,21 +21,34 @@ public class BackStabListener implements Listener {
 	
 	public BackStabListener(BackStab plugin) {
 		this.items = new HashSet<Material>();
-		ConfigurationSection section = plugin.getConfig().getConfigurationSection("items");
-		for (String key : section.getKeys(false)) {
-			Material item = Material.matchMaterial(key);
-			if (item == null) {
+		Object section = plugin.getConfig().get("items");
+		
+		if (!(section instanceof ConfigurationSection)) {
+			return;
+		}
+		
+		ConfigurationSection config = (ConfigurationSection) section;
+		
+		for (String key : config.getKeys(false)) {
+			try {
+				Material item = Material.matchMaterial(key);
+				if (item == null) {
+					
+				} else {
+					this.items.add(item);
+				}
+			} catch (Exception e) {
 				
 			}
-			this.items.add(item);
+
 		}
 	}
 	
 	@EventHandler
-	public void onDamage(EntityDamageByEntityEvent event, EntityDamageEvent event2) {
+	public void onDamage(EntityDamageByEntityEvent damageEvent) {
 		
-		Entity damager = event.getDamager();
-		Entity damaged = event.getEntity();
+		Entity damager = damageEvent.getDamager();
+		Entity damaged = damageEvent.getEntity();
 		
 		if (!(damager instanceof Player)) {
 			return;
@@ -48,25 +61,25 @@ public class BackStabListener implements Listener {
 		Vector damagerV = damager.getLocation().getDirection();
 		Vector damagedV = damaged.getLocation().getDirection();
 		
-		if (damagedV.angle(damagerV) <= 225 && damagedV.angle(damagerV) >= 135) {
+		if (Math.abs(damagerV.angle(damagedV)) <= Math.PI/4) {
 			
 			Player damagedPlayer = ((Player) damaged);
 			Player damagerPlayer = ((Player) damager);
 			ItemStack item = damagerPlayer.getItemInHand();
 			
-			if ((damagedPlayer.hasPermission("minekingdom.backStabbed") || (damagerPlayer.hasPermission("minekingdom.backStabber")))) {
-				
+			if (!(damagedPlayer.hasPermission("minekingdom.backStabbed") || (damagerPlayer.hasPermission("minekingdom.backStabber")))) {
+				return;
 			}
 			
 			if (items.contains(item.getType())) {
 				
-				if (event2.getEntity().equals(damaged)) {
+				if (damageEvent.getEntity().equals(damaged)) {
 					
-					Double damage = event2.getDamage();
+					Double damage = damageEvent.getDamage();
+					damageEvent.setDamage(damage*1.5);
 					
-					event2.setDamage(damage*2);
-					damagerPlayer.sendMessage(ChatColor.GREEN + "Backstab succeded !");
-					damagedPlayer.sendMessage(ChatColor.RED + "You've been Backstabbed !");
+					damagerPlayer.sendMessage(ChatColor.GREEN + "Backstab successful !");
+					damagedPlayer.sendMessage(ChatColor.RED + "You've been backstabbed.");
 					
 				}
 			}	
